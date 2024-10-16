@@ -1,0 +1,131 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // 
+  phoneNum      String    @unique
+  photo         String    @unique
+  latitude      BigInt?
+  longitude     BigInt?
+  role          ROLE
+  donor         Donor?
+  acceptor      Acceptor?
+
+  @@index([name])
+  @@index([phoneNum])
+}
+
+model Donor {
+  id                String     @unique
+  user              User       @relation(fields: [id], references: [id])
+  likes             Like[]
+  tweets            Tweet[]
+  followers         Donor[]    @relation("Followers")
+  following         Donor[]    @relation("Followers")
+  acceptedProposals Proposal[]
+
+  @@id([id])
+}
+
+model Acceptor {
+  id                String    @unique
+  user              User      @relation(fields: [id], references: [id])
+  writtenProposalId Proposal?
+
+  @@id([id])
+}
+
+model Tweet {
+  id        String   @id @default(cuid())
+  donorId   String
+  donor     Donor    @relation(fields: [donorId], references: [id], onDelete: Cascade)
+  text      String
+  likes     Like[]
+  createdAt DateTime @default(now())
+
+  @@unique([id, createdAt])
+  @@index([donorId])
+}
+
+model Like {
+  donorId String
+  tweetId String
+  donor   Donor  @relation(fields: [donorId], references: [id], onDelete: Cascade)
+  tweet   Tweet  @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+  @@id([donorId, tweetId])
+  @@index([donorId])
+  @@index([tweetId])
+}
+
+model Proposal {
+  authorId        String   @unique
+  author          Acceptor @relation(fields: [authorId], references: [id])
+  reason          String
+  amount          BigInt
+  status          STATUS
+  acceptedDonorId String?
+  donor           Donor?   @relation(fields: [acceptedDonorId], references: [id])
+
+  @@id([authorId])
+  @@index([acceptedDonorId])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum STATUS {
+  CREATED
+  HIDDEN
+  ACCEPTED
+  DELETE
+}
+
+enum ROLE {
+  DONOR
+  ACCEPTOR
+}
+
+// model Endorsement {
+//   proposalId String   @unique
+//   proposal   Proposal @relation(fields: [proposalId], references: [authorId], onDelete: Cascade)
+//   donorId    String   @unique
+//   donor      Donor?   @relation(fields: [donorId], references: [id])
+
+//   @@id([proposalId, donorId])
+// }
