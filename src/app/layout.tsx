@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Provider from "@/providers";
+import LeftSidebar from "@/components/LeftSidebar";
+import RightSidebar from "@/components/RightSidebar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,9 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased container min-h-screen mx-auto font-geist-serif flex px-4 py-8 relative`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased container min-h-screen mx-auto font-geist-serif flex relative px-4`}
       >
-        <Provider>{children}</Provider>
+        <Provider>
+          <LeftSidebar />
+          {children}
+          <RightSidebar />
+        </Provider>
       </body>
     </html>
   );

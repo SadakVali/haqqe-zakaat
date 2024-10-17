@@ -8,9 +8,9 @@ const Provider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
+      defaultTheme="dark"
+      enableSystem={false}
+      disableTransitionOnChange={true}
     >
       {children}
       <Toaster />
